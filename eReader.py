@@ -47,6 +47,15 @@ class UI(QMainWindow):
         self.tabs.setDocumentMode(True)
         self.tabs.setMovable(True)
         self.tabs.setTabPosition(QTabWidget.North)
+        self.tabs.setTabsClosable(True)
+
+
+        #Corner tab button
+        self.tabPlus = QToolButton(self)
+        self.tabPlus.setText('+')
+        self.tabs.setCornerWidget(self.tabPlus)
+        self.tabPlus.clicked.connect(self.readFile)
+        
  
 
     #Split into two functions one opens file another adds tab?
@@ -55,7 +64,8 @@ class UI(QMainWindow):
         self.tabs.setCurrentWidget(self.webView)
         fname = QFileDialog.getOpenFileName(self, "Open File", "c:\\", "PDF Files (*.pdf)")
         fnameString = str(fname[0])
-        self.add_new_tab(fnameString)
+        if fnameString != '':
+            self.add_new_tab(fnameString)
 
         #Useless line?
         self.tabs.setCurrentWidget(self)
@@ -74,11 +84,15 @@ class UI(QMainWindow):
 
         if fname:
             view.setUrl(QUrl(f"{fname}"))
-            view.show()            
+            view.show()    
+
+     
 
     #ZOOM IN AND OUT FUNCTIONALITY ON BOOKS
     #SHORTCUT TO OPEN FILE?
-    #PLUS BUTTON TO ADD NEW FILE HAVE IT OPEN THE DIALOG BOX HAVE PLUS CALL READ FILE
+    # Close tabs functionsality what happens after tab is closed?
+    # - current or central widget is main window again? if tab count == 0
+    # - 
 
 
 
