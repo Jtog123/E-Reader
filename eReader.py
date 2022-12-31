@@ -9,35 +9,54 @@ import os
 
 
 
-class UI(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
-        super(UI, self).__init__()
+        super(MainWindow, self).__init__()
 
-        #Set height of the window
+        #Get size of screen if needed
+        screen = QApplication.primaryScreen()
+        self.screenSize = screen.availableGeometry()
+
+        #Set size of the window
         width = 800
         height = 800
         self.setMinimumSize(width, height)
+        self.initUI()
 
+    def initUI(self):
 
     
         #need to be class variable or local?
         self.button_action = QAction(QIcon('icons/folder-horizontal-open.png'), 'Open File', self)
         self.button_action.triggered.connect(self.readFile)
+        self.button_action.setShortcut( QKeySequence("Ctrl+o") )
+
 
         #Create menu bar at top of screen
         self.menu = self.menuBar()
         fileMenu = self.menu.addMenu('&File')
         fileMenu.addAction(self.button_action)
 
+        #dictionary takes place in side window?
+        #Click on dict take me to another page?
+        #How do i get back?
+        dictionary = self.menu.addMenu('&Dictionary')
+        
+
         #create button that opens file dialog
         self.button = QPushButton("&Open File", self)
         self.button.clicked.connect(self.readFile)
         self.button.move(0,200)
+
+        self.dictButton = QPushButton("&Dictionary",self)
+
+        self.readerButton = QPushButton("&Reader",self)
+
         
         
         
         #have the PDF file open in the window with open file
-        self.webView = QWebEngineView()
+        #self.webView = QWebEngineView()
         #self.webView.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
         #self.webView.settings().setAttribute(QWebEngineSettings.PdfViewerEnabled, True)
 
@@ -51,6 +70,7 @@ class UI(QMainWindow):
         #Close Tabs
         self.tabs.tabCloseRequested.connect(self.tabs.removeTab)
             #self.button.show() SHOW BUTTON AFTER TAB IS CLOSED?
+            #Use event?
 
         #Corner tab button
         self.tabPlus = QToolButton(self)
@@ -64,15 +84,31 @@ class UI(QMainWindow):
         #Layout allows for multiple widgets to be active at once
         #probably a good idea to set this up first before adding other widgets
 
-        layout = QVBoxLayout()
+        mainLayout = QVBoxLayout()
 
         # Add the self.tabs widget and self.button to the layout
-        layout.addWidget(self.tabs)
-        layout.addWidget(self.button)
+        mainLayout.addWidget(self.tabs)
+        #mainLayout.addWidget(self.button)
+        #mainLayout.addWidget(self.dictButton)
+        #layout.addStretch(0)
+
+        #Footer
+        footerWidget = QWidget()
+        hLay = QHBoxLayout(footerWidget)
+        hLay.addWidget(self.button, alignment=Qt.AlignLeft)
+        hLay.addStretch()
+        hLay.addWidget(self.readerButton, alignment=Qt.AlignRight)
+        hLay.addWidget(self.dictButton,alignment=Qt.AlignRight)
+
+        
+        
+
+        mainLayout.addWidget(footerWidget)
 
         # Create a widget to hold the layout
         central_widget = QWidget()
-        central_widget.setLayout(layout)
+        central_widget.setLayout(mainLayout)
+        
 
         # Set the central widget of the main window to be the widget holding the layout
         self.setCentralWidget(central_widget)
@@ -110,34 +146,29 @@ class UI(QMainWindow):
 
     #ZOOM IN AND OUT FUNCTIONALITY ON BOOKS
     #SHORTCUT TO OPEN FILE?
-    # Close tabs functionsality what happens after tab is closed?
-    # - current or central widget is main window again? if tab count == 0
-    # - 
+    # Adjust layout to liking
+    #  Open new page when dictionary button is clicked
+    #open to dictionary
+    #go back to main page when reader button in clicked
 
-
-
-
+#or inherit from Qmainwindow?
 '''
-    CAN PROBABLY THROW AWAY
-    def openFile(self):
-        #Open File dialog
-        #Returns tuple with file name and type of file
-        self.setCentralWidget(self.stackedWidget)
-        fname = QFileDialog.getOpenFileName(self, "Open File", "c:\\", "PDF Files (*.pdf)")
-        fnameString = str(fname[0])
-        if fname:
-            self.webView.setUrl(QUrl(f"{fnameString}"))
-            self.stackedWidget.show()
-            #self.webView.show()
-'''       
+Might now need
+class DictionaryWindow(QWidget):
+    def init(self):
+        super(DictionaryWindow,self).__init__()
+'''
+
+
         
-#only one instance
-app = QApplication(sys.argv)
+if __name__ == '__main__':
+    #only one instance
+    app = QApplication(sys.argv)
 
-window = UI()
-window.show()
+    window = MainWindow()
+    window.show()
 
 
-# Start the event loop
-app.exec_()
+    # Start the event loop
+    app.exec_()
 
