@@ -22,6 +22,9 @@ class MainWindow(QMainWindow):
         height = 800
         self.setMinimumSize(width, height)
         self.initUI()
+        self.pageStack.currentChanged.connect(self.set_button_state)
+        self.dictButton.clicked.connect(self.dictionary_page)
+        self.readerButton.clicked.connect(self.reader_page)
 
     def initUI(self):
 
@@ -48,17 +51,14 @@ class MainWindow(QMainWindow):
         self.button.clicked.connect(self.readFile)
         self.button.move(0,200)
 
+        ### footer buttons and widgets
         self.dictButton = QPushButton("&Dictionary",self)
 
         self.readerButton = QPushButton("&Reader",self)
+        self.readerButton.setEnabled(False) #set to true when we click on dictionary button
 
-        
-        
-        
-        #have the PDF file open in the window with open file
-        #self.webView = QWebEngineView()
-        #self.webView.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
-        #self.webView.settings().setAttribute(QWebEngineSettings.PdfViewerEnabled, True)
+
+
 
         #Tab Widgets
         self.tabs = QTabWidget()
@@ -69,8 +69,8 @@ class MainWindow(QMainWindow):
 
         #Close Tabs
         self.tabs.tabCloseRequested.connect(self.tabs.removeTab)
-            #self.button.show() SHOW BUTTON AFTER TAB IS CLOSED?
-            #Use event?
+        #self.button.show() SHOW BUTTON AFTER TAB IS CLOSED?
+        #Use event?
 
         #Corner tab button
         self.tabPlus = QToolButton(self)
@@ -84,10 +84,15 @@ class MainWindow(QMainWindow):
         #Layout allows for multiple widgets to be active at once
         #probably a good idea to set this up first before adding other widgets
 
+        self.pageStack = QStackedWidget()
+
         mainLayout = QVBoxLayout()
+        
 
         # Add the self.tabs widget and self.button to the layout
-        mainLayout.addWidget(self.tabs)
+        mainLayout.addWidget(self.pageStack)
+        #mainLayout.addWidget(self.tabs)
+        self.pageStack.addWidget(self.tabs)
         #mainLayout.addWidget(self.button)
         #mainLayout.addWidget(self.dictButton)
         #layout.addStretch(0)
@@ -99,21 +104,22 @@ class MainWindow(QMainWindow):
         hLay.addStretch()
         hLay.addWidget(self.readerButton, alignment=Qt.AlignRight)
         hLay.addWidget(self.dictButton,alignment=Qt.AlignRight)
-
-        
         
 
+        
+    
         mainLayout.addWidget(footerWidget)
+        
 
         # Create a widget to hold the layout
         central_widget = QWidget()
         central_widget.setLayout(mainLayout)
-        
 
         # Set the central widget of the main window to be the widget holding the layout
         self.setCentralWidget(central_widget)
 
-
+    def set_button_state(self, index):
+        print("vvv")
 
     #Read files
     def readFile(self):
@@ -125,9 +131,6 @@ class MainWindow(QMainWindow):
         if fnameString != '':
             self.add_new_tab(fnameString)
             
-            
-
-
     #Add Tabs
     def add_new_tab(self, fname):
 
@@ -141,8 +144,24 @@ class MainWindow(QMainWindow):
 
         if fname:
             view.setUrl(QUrl(f"{fname}"))
-            view.show()   
-            
+            view.show()
+
+    def insert_page(self, index=-1):
+        self.pageStack.insertWidget(index, QLabel("THis is page 2"))
+
+
+    def dictionary_page(self):
+        new_index = self.pageStack.currentIndex()+1
+        if new_index < len(self.pageStack):
+            self.pageStack.setCurrentIndex(new_index)        
+        self.readerButton.setEnabled(True)
+
+    def reader_page(self):
+        new_index = self.pageStack.currentIndex()-1
+        if new_index >= 0:
+            self.pageStack.setCurrentIndex(new_index)
+
+
 
     #ZOOM IN AND OUT FUNCTIONALITY ON BOOKS
     #SHORTCUT TO OPEN FILE?
@@ -167,6 +186,7 @@ if __name__ == '__main__':
 
     window = MainWindow()
     window.show()
+    window.insert_page()
 
 
     # Start the event loop
