@@ -22,14 +22,11 @@ class MainWindow(QMainWindow):
         height = 800
         self.setMinimumSize(width, height)
         self.initUI()
-        self.pageStack.currentChanged.connect(self.set_button_state)
-        self.dictButton.clicked.connect(self.dictionary_page)
-        self.readerButton.clicked.connect(self.reader_page)
 
     def initUI(self):
 
     
-        #need to be class variable or local?
+        #Opens file through using Tab, alos includes shortcut for opening a file
         self.button_action = QAction(QIcon('icons/folder-horizontal-open.png'), 'Open File', self)
         self.button_action.triggered.connect(self.readFile)
         self.button_action.setShortcut( QKeySequence("Ctrl+o") )
@@ -40,27 +37,35 @@ class MainWindow(QMainWindow):
         fileMenu = self.menu.addMenu('&File')
         fileMenu.addAction(self.button_action)
 
-        #dictionary takes place in side window?
-        #Click on dict take me to another page?
-        #How do i get back?
+        #Dictionary tab
         dictionary = self.menu.addMenu('&Dictionary')
         
 
         #create button that opens file dialog
-        self.button = QPushButton("&Open File", self)
-        self.button.clicked.connect(self.readFile)
-        self.button.move(0,200)
+        self.openFilebutton = QPushButton("&Open File", self)
+        self.openFilebutton.clicked.connect(self.readFile)
 
-        ### footer buttons and widgets
-        self.dictButton = QPushButton("&Dictionary",self)
 
-        self.readerButton = QPushButton("&Reader",self)
+        #Dictionary Button toggle back and forth between reader
+        self.dictButton = QPushButton("&Dictionary", self)
+        self.dictButton.clicked.connect(self.dictionary_page)
+        
+
+        #Reader Button toggle back and forth between dictionary
+        self.readerButton = QPushButton("&Reader", self)
         self.readerButton.setEnabled(False) #set to true when we click on dictionary button
+        self.readerButton.clicked.connect(self.reader_page)
+
+        self.searchButton = QPushButton("&Search", self)
 
 
+        #Dictionary label
+        self.dictLabel = QLabel("Dictionary page")
+        self.dictLabel.setAlignment(Qt.AlignCenter)
+        self.dictLabel.setStyleSheet("background-color: lightgreen")
 
 
-        #Tab Widgets
+        #Tab Widget
         self.tabs = QTabWidget()
         self.tabs.setDocumentMode(True)
         self.tabs.setMovable(True)
@@ -69,8 +74,7 @@ class MainWindow(QMainWindow):
 
         #Close Tabs
         self.tabs.tabCloseRequested.connect(self.tabs.removeTab)
-        #self.button.show() SHOW BUTTON AFTER TAB IS CLOSED?
-        #Use event?
+
 
         #Corner tab button
         self.tabPlus = QToolButton(self)
@@ -78,54 +82,54 @@ class MainWindow(QMainWindow):
         self.tabs.setCornerWidget(self.tabPlus)
         self.tabPlus.clicked.connect(self.readFile)
 
+        self.searchBar = QLineEdit()
 
-        ###### ACTUALLY KIND OF WORKS
 
         #Layout allows for multiple widgets to be active at once
         #probably a good idea to set this up first before adding other widgets
 
+        #Create the stackedwidget and the mainlayout which is a vertical box layout
         self.pageStack = QStackedWidget()
-
         mainLayout = QVBoxLayout()
-        
 
-        # Add the self.tabs widget and self.button to the layout
-        mainLayout.addWidget(self.pageStack)
-        #mainLayout.addWidget(self.tabs)
-        self.pageStack.addWidget(self.tabs)
-        #mainLayout.addWidget(self.button)
-        #mainLayout.addWidget(self.dictButton)
-        #layout.addStretch(0)
 
-        #Footer
-        footerWidget = QWidget()
-        hLay = QHBoxLayout(footerWidget)
-        hLay.addWidget(self.button, alignment=Qt.AlignLeft)
-        hLay.addStretch()
-        hLay.addWidget(self.readerButton, alignment=Qt.AlignRight)
-        hLay.addWidget(self.dictButton,alignment=Qt.AlignRight)
-        
-
-        
-    
-        mainLayout.addWidget(footerWidget)
-        
-
-        # Create a widget to hold the layout
+        # Create a central widget, set the layout as the main layout
         central_widget = QWidget()
         central_widget.setLayout(mainLayout)
 
-        # Set the central widget of the main window to be the widget holding the layout
+        # Make the windows central widget the central_widget variable
         self.setCentralWidget(central_widget)
 
-    def set_button_state(self, index):
-        print("vvv")
+        #Search Header Widget
+        self.headerWidget = QWidget()
+        searchLayout = QHBoxLayout(self.headerWidget)
+        searchLayout.addWidget(self.searchButton)
+        searchLayout.addWidget(self.searchBar)
+        searchLayout.addStretch()
+        mainLayout.addWidget(self.headerWidget)
+        self.headerWidget.hide()
+        
+
+        #Add the stackedWidget to the mainlayout, add the tabswidget to the stackedwidget
+        mainLayout.addWidget(self.pageStack)
+        self.pageStack.addWidget(self.tabs)
+
+
+        #Footer Layout with buttons added
+        footerWidget = QWidget()
+        hLay = QHBoxLayout(footerWidget)
+        hLay.addWidget(self.openFilebutton, alignment=Qt.AlignLeft)
+        hLay.addStretch()
+        hLay.addWidget(self.readerButton, alignment=Qt.AlignRight)
+        hLay.addWidget(self.dictButton,alignment=Qt.AlignRight)
+
+        
+        #Add the footer widget to the main layout
+        mainLayout.addWidget(footerWidget)
+
 
     #Read files
     def readFile(self):
-
-        #self.tabs.setCurrentWidget(self.webView)
-        #self.button.hide() HIDE AND SHOW BUTTON ON CLICK
         fname = QFileDialog.getOpenFileName(self, "Open File", "c:\\", "PDF Files (*.pdf)")
         fnameString = str(fname[0])
         if fnameString != '':
@@ -146,29 +150,42 @@ class MainWindow(QMainWindow):
             view.setUrl(QUrl(f"{fname}"))
             view.show()
 
-    def insert_page(self, index=-1):
-        self.pageStack.insertWidget(index, QLabel("THis is page 2"))
+    def insert_page(self, index= -1):
+        self.pageStack.insertWidget(index, self.dictLabel) #Might have to create own label
 
-
+        
     def dictionary_page(self):
-        new_index = self.pageStack.currentIndex()+1
+
+        self.headerWidget.show()
+
+        new_index = self.pageStack.currentIndex() + 1
         if new_index < len(self.pageStack):
-            self.pageStack.setCurrentIndex(new_index)        
+            self.pageStack.setCurrentIndex(new_index)  
+
         self.readerButton.setEnabled(True)
+        self.dictButton.setEnabled(False)
+        self.openFilebutton.setEnabled(False)
+
 
     def reader_page(self):
-        new_index = self.pageStack.currentIndex()-1
+        self.headerWidget.hide()
+
+        new_index = self.pageStack.currentIndex() - 1
         if new_index >= 0:
             self.pageStack.setCurrentIndex(new_index)
+        
+        self.readerButton.setEnabled(False)
+        self.dictButton.setEnabled(True)
+        self.openFilebutton.setEnabled(True)
+        
 
 
-
+    #Code Clean up 
+    #Find dictionary api
+    #Add line edit to dictionary page
     #ZOOM IN AND OUT FUNCTIONALITY ON BOOKS
-    #SHORTCUT TO OPEN FILE?
-    # Adjust layout to liking
-    #  Open new page when dictionary button is clicked
-    #open to dictionary
-    #go back to main page when reader button in clicked
+    # QlineEdit Completer
+    #search button for dictionary page
 
 #or inherit from Qmainwindow?
 '''
