@@ -64,13 +64,19 @@ class MainWindow(QMainWindow):
         self.searchButton.clicked.connect(self.search_dict)
 
         #Search text
-        self.searchText = ""
+        #self.searchText = ""
 
+        #Search word label
+        self.search_word_label = QLabel("")
 
         #Dictionary label
-        self.dictLabel = QLabel("Dictionary page")
-        self.dictLabel.setAlignment(Qt.AlignCenter)
-        self.dictLabel.setStyleSheet("background-color: lightgreen")
+        self.dictLabel = QLabel("Your search result will appear here.")
+        self.dictLabel.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        #self.dictLabel.setStyleSheet("background-color: lightgreen")
+        self.dictLabel.setWordWrap(True)
+        self.dictFont = QFont("Arial", 12, QFont.Bold)
+        #serifFont = QFont("Times", 12, QFont.Bold)
+        self.dictLabel.setFont(self.dictFont)
 
 
         #Tab Widget
@@ -162,6 +168,7 @@ class MainWindow(QMainWindow):
             view.show()
 
     def insert_page(self, index = -1):
+        #self.pageStack.insertWidget(index,self.search_word_label)
         self.pageStack.insertWidget(index, self.dictLabel) #Might have to create own label
 
         
@@ -191,13 +198,21 @@ class MainWindow(QMainWindow):
     def search_dict(self):
         dictionary = Dictionary() #Create dict
         searchText = self.searchBar.text() #get text from bar
-        #freshText = QLabel(searchText) #Create new label
-        dictionary.update_url(searchText) #Update url with new search term
-        self.dictLabel.setText(dictionary.recievedDefinition)
+
+        #Also if the word doesnt exist write a case for this
+        #program breaks if word is spelled wrong
+        if searchText != '':
+            self.dictLabel.setStyleSheet("color: black")
+            dictionary.update_url(searchText) #Update url with new search term
+            self.dictLabel.setText(searchText +": "+ "\n" + dictionary.recievedDefinition)
+        else:
+            self.dictLabel.setStyleSheet("color: red")
+            self.dictLabel.setText("Enter a valid word")
+            
         
 
-        print(searchText)
-        print(dictionary.recievedDefinition) #The recieved definition IS NOT UPDATING
+        #print(searchText)
+        #print(dictionary.recievedDefinition) #The recieved definition IS NOT UPDATING
 
 
         
@@ -214,9 +229,7 @@ class MainWindow(QMainWindow):
     # QCompeleter only make completer start if string len is >= 3
     #Get a dict or list from the api
     #Set that into the completer
-    #on enter or press search 
-    #get_definition function
-    #search button for dictionary page
+
 
     #Type in a word
     #press search
