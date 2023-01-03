@@ -6,6 +6,10 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 
 import sys
 import os
+import requests
+import json
+
+
 
 
 
@@ -38,7 +42,7 @@ class MainWindow(QMainWindow):
         fileMenu.addAction(self.button_action)
 
         #Dictionary tab
-        dictionary = self.menu.addMenu('&Dictionary')
+        dictionaryTab = self.menu.addMenu('&Dictionary')
         
 
         #create button that opens file dialog
@@ -57,6 +61,10 @@ class MainWindow(QMainWindow):
         self.readerButton.clicked.connect(self.reader_page)
 
         self.searchButton = QPushButton("&Search", self)
+        self.searchButton.clicked.connect(self.search_dict)
+
+        #Search text
+        self.searchText = ""
 
 
         #Dictionary label
@@ -83,6 +91,7 @@ class MainWindow(QMainWindow):
         self.tabPlus.clicked.connect(self.readFile)
 
         self.searchBar = QLineEdit()
+        self.searchBar.setText("Search")
 
 
         #Layout allows for multiple widgets to be active at once
@@ -103,8 +112,8 @@ class MainWindow(QMainWindow):
         #Search Header Widget
         self.headerWidget = QWidget()
         searchLayout = QHBoxLayout(self.headerWidget)
-        searchLayout.addWidget(self.searchButton)
         searchLayout.addWidget(self.searchBar)
+        searchLayout.addWidget(self.searchButton)
         searchLayout.addStretch()
         mainLayout.addWidget(self.headerWidget)
         self.headerWidget.hide()
@@ -126,6 +135,8 @@ class MainWindow(QMainWindow):
         
         #Add the footer widget to the main layout
         mainLayout.addWidget(footerWidget)
+
+        #self.dictionary = Dictionary()
 
 
     #Read files
@@ -150,12 +161,11 @@ class MainWindow(QMainWindow):
             view.setUrl(QUrl(f"{fname}"))
             view.show()
 
-    def insert_page(self, index= -1):
+    def insert_page(self, index = -1):
         self.pageStack.insertWidget(index, self.dictLabel) #Might have to create own label
 
         
     def dictionary_page(self):
-
         self.headerWidget.show()
 
         new_index = self.pageStack.currentIndex() + 1
@@ -177,15 +187,43 @@ class MainWindow(QMainWindow):
         self.readerButton.setEnabled(False)
         self.dictButton.setEnabled(True)
         self.openFilebutton.setEnabled(True)
+    
+    def search_dict(self):
+        dictionary = Dictionary() #Create dict
+        searchText = self.searchBar.text() #get text from bar
+        #freshText = QLabel(searchText) #Create new label
+        dictionary.update_url(searchText) #Update url with new search term
+        self.dictLabel.setText(dictionary.recievedDefinition)
+        
+
+        print(searchText)
+        print(dictionary.recievedDefinition) #The recieved definition IS NOT UPDATING
+
+
+        
         
 
 
     #Code Clean up 
     #Find dictionary api
-    #Add line edit to dictionary page
+
+    #Get APi key, hide it with system variable
+    #Qcompleter fills in words when querying api
+
     #ZOOM IN AND OUT FUNCTIONALITY ON BOOKS
-    # QlineEdit Completer
+    # QCompeleter only make completer start if string len is >= 3
+    #Get a dict or list from the api
+    #Set that into the completer
+    #on enter or press search 
+    #get_definition function
     #search button for dictionary page
+
+    #Type in a word
+    #press search
+    #Word and definition display themselves, TWO REQUESTS? OR JUST STORE WORD IN VARIABLE less indexing?
+
+    #If search bar is '' dont allow search
+    #enter word to search
 
 #or inherit from Qmainwindow?
 '''
@@ -195,6 +233,30 @@ class DictionaryWindow(QWidget):
         super(DictionaryWindow,self).__init__()
 '''
 
+class Dictionary():
+    def __init__(self):
+
+        self.app_id = os.environ.get("READER_ID")
+        self.app_key = os.environ.get("READER_API_KEY")
+        self.language = "en-gb"
+        self.searchWord = "search"
+        self.url = "https://od-api.oxforddictionaries.com:443/api/v2/words/" + self.language + "?q=" + self.searchWord + "&fields=definitions"  
+        self.request = requests.get(self.url, headers={"app_id": self.app_id, "app_key": self.app_key})
+        self.data = self.request.json()
+        self.recievedDefinition = self.data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+    
+    def set_word(self, word):
+        self.searchWord = word
+    
+    def update_url(self, word):
+        self.url = "https://od-api.oxforddictionaries.com:443/api/v2/words/" + self.language + "?q=" + word + "&fields=definitions" 
+        self.update_request()
+    
+    def update_request(self):
+        self.request = requests.get(self.url, headers={"app_id": self.app_id, "app_key": self.app_key})
+        self.data = self.request.json()
+        self.recievedDefinition = self.data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+        print(self.url)
 
         
 if __name__ == '__main__':
@@ -204,6 +266,10 @@ if __name__ == '__main__':
     window = MainWindow()
     window.show()
     window.insert_page()
+    #dictionary = Dictionary()
+
+    #dict = Dictionary()
+    #print(dict.recievedWord)
 
 
     # Start the event loop
