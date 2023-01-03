@@ -266,10 +266,13 @@ class Dictionary():
         self.update_request()
     
     def update_request(self):
-        self.request = requests.get(self.url, headers={"app_id": self.app_id, "app_key": self.app_key})
-        self.data = self.request.json()
-        self.recievedDefinition = self.data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
-        print(self.url)
+        #Try catch here? if we make a bad request handle the exception. self.received definition equals. Not a word. Check spelling
+        try:
+            self.request = requests.get(self.url, headers={"app_id": self.app_id, "app_key": self.app_key})
+            self.data = self.request.json()
+            self.recievedDefinition = self.data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+        except KeyError:
+            self.recievedDefinition = "Potentially misspelled word, or word doesnt exist." #Rephrase this
 
         
 if __name__ == '__main__':
