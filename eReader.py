@@ -23,6 +23,7 @@ class MainWindow(QMainWindow):
         height = 800
         self.setMinimumSize(width, height)
         self.initUI()
+        self.set_styles()
 
     def initUI(self):
 
@@ -38,13 +39,10 @@ class MainWindow(QMainWindow):
         fileMenu = self.menu.addMenu('&File')
         fileMenu.addAction(self.button_action)
 
-        #Dictionary tab
-        dictionaryTab = self.menu.addMenu('&Dictionary')
-        
-
         #create button that opens file dialog
         self.openFilebutton = QPushButton("&Open File", self)
         self.openFilebutton.clicked.connect(self.readFile)
+        
 
 
         #Dictionary Button toggle back and forth between reader
@@ -78,6 +76,7 @@ class MainWindow(QMainWindow):
         self.tabs.setTabPosition(QTabWidget.North)
         self.tabs.setTabsClosable(True)
 
+        
         #Close Tabs
         self.tabs.tabCloseRequested.connect(self.tabs.removeTab)
 
@@ -85,9 +84,11 @@ class MainWindow(QMainWindow):
         #Corner tab button
         self.tabPlus = QToolButton(self)
         self.tabPlus.setText('+')
+        self.tabPlus.setStyleSheet("background-color:#c484a3")
         self.tabs.setCornerWidget(self.tabPlus)
         self.tabPlus.clicked.connect(self.readFile)
 
+        #Search Bar
         self.searchBar = QLineEdit()
         self.searchBar.setText("Search")
 
@@ -185,16 +186,27 @@ class MainWindow(QMainWindow):
 
         if searchText != '':
             self.dictLabel.setStyleSheet("color: black")
+            self.dictLabel.setStyleSheet("background-color: #dcdedc;")
             dictionary.update_url(searchText) #Update url with new search term
             self.dictLabel.setText(searchText +": "+ "\n" + dictionary.recievedDefinition)
         else:
             self.dictLabel.setStyleSheet("color: red")
             self.dictLabel.setText("Enter a valid word")
+    
+    def set_styles(self):
+        self.setStyleSheet("background-color: #a2aba5;")
+        self.menu.setStyleSheet("background-color: #c2c4c3;")
+        self.openFilebutton.setStyleSheet("background-color: #c2c4c3;")
+        self.readerButton.setStyleSheet("background-color: #c2c4c3;")
+        self.dictButton.setStyleSheet("background-color: #c2c4c3;")
+        self.searchButton.setStyleSheet("background-color: #c2c4c3;")
+        self.searchBar.setStyleSheet("background-color: #c2c4c3;")
+        self.dictLabel.setStyleSheet("background-color: #dcdedc;")
 
 
-    #ZOOM IN AND OUT FUNCTIONALITY ON BOOKS
-    # QCompeleter only make completer start if string len is >= 3
-    #Set that into the completer
+    #adjust names to be pythonic
+    #Add zoom buttons
+    #Threading?
 
 
 class Dictionary():
