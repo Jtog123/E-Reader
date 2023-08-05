@@ -9,6 +9,11 @@ import os
 import requests
 import json
 
+'''
+TO DO
+Apply multithreading?
+'''
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -204,11 +209,6 @@ class MainWindow(QMainWindow):
         self.search_button.setStyleSheet("background-color: #c2c4c3;")
         self.search_bar.setStyleSheet("background-color: #c2c4c3;")
         self.dict_label.setStyleSheet("background-color: #dcdedc;")
-
-
-    #adjust names to be pythonic
-    #Add zoom buttons
-    #Threading?
 
 
 class Dictionary():
