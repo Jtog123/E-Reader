@@ -27,8 +27,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
 
-    
-        #Opens file through using Tab, alos includes shortcut for opening a file
+        #Opens file through using Tab, also includes shortcut for opening a file
         self.button_action = QAction(QIcon('icons/folder-horizontal-open.png'), 'Open File', self)
         self.button_action.triggered.connect(self.readFile)
         self.button_action.setShortcut( QKeySequence("Ctrl+o") )
@@ -38,6 +37,8 @@ class MainWindow(QMainWindow):
         self.menu = self.menuBar()
         fileMenu = self.menu.addMenu('&File')
         fileMenu.addAction(self.button_action)
+
+        #Create view tab?
 
         #create button that opens file dialog
         self.openFilebutton = QPushButton("&Open File", self)
@@ -149,6 +150,7 @@ class MainWindow(QMainWindow):
 
         self.tabs.addTab(view, "New Tab")
 
+        #Figure out how to get pdf name as string
         if fname:
             view.setUrl(QUrl(f"{fname}"))
             view.show()
